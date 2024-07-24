@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+import sys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -102,6 +103,6 @@ def init(username, password, two_FA_Code, reciever, message):
 	print("DONE")
 
 auth_code = authenticator.returnTwoFA('Instagram')
-user = '_lavannya_15'
-message_ = 'THIS MESSAGE IS SEND TO YOU BY MY SCRIPT'
+user = sys.argv[1]
+message_ = sys.argv[2]
 init('zenderwastaken', '02jISG#SNuP5krJ1', auth_code, user, message_)
