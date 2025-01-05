@@ -8,83 +8,77 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
 import authenticator
 
-driver = webdriver.Firefox()
-
 class bot:
-	def __init__(self, username, password, twofa, receiver, message):
+	def __init__(self, username: str, password: str, twofa: bool, code: str, receiver: str, message: str):
+		driver = webdriver.Firefox()
+
 		self.username = username
 		self.password = password
 		self.receiver = receiver
 		self.message = message
 		self.twofa = twofa
-		self.base_url = 'https://www.instagram.com/accounts/login/'
+		self.code = code
+		self.login_url = 'https://www.instagram.com/accounts/login/'
+		self.dm_url = 'https://www.instagram.com/direct/inbox/'
 		self.bot = driver
+
 		self.login()
 
 	def login(self):
-		self.bot.get(self.base_url)
+		self.bot.get(self.login_url)
 
 		# enter username
-		enter_username = WebDriverWait(self.bot, 20).until(
-			expected_conditions.presence_of_element_located((By.NAME, 'username')))
+		enter_username = WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.NAME, 'username')))
 		enter_username.send_keys(self.username)
 
 		# enter password
-		enter_password = WebDriverWait(self.bot, 20).until(
-			expected_conditions.presence_of_element_located((By.NAME, 'password')))
+		enter_password = WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.NAME, 'password')))
 		enter_password.send_keys(self.password)
 
 		# press RETURN to go to next screen
 		enter_password.send_keys(Keys.RETURN)
-		time.sleep(5)
 
-		# enter 2FA
-		enter_twofa = WebDriverWait(self.bot, 20).until(
-			expected_conditions.presence_of_element_located((By.NAME, 'verificationCode')))
-		enter_twofa.send_keys(self.twofa)
+		# if account has 2FA
+		if self.twofa:
+			time.sleep(5)
 
-		# press RETURN to go to next screen
-		enter_twofa.send_keys(Keys.ENTER)
-		time.sleep(10)
+			# enter 2FA
+			enter_code = WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.NAME, 'verificationCode')))
+			enter_code.send_keys(self.code)
+
+			# press RETURN to go to next screen
+			enter_code.send_keys(Keys.ENTER)
+
+		# waiting for page to load
+		time.sleep(7)
 
 		# save login pop-up --> press do not save
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/div/div/div/div/div').click()
-		time.sleep(5)
+		WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, 'div.x1i10hfl'))).click()
 
 		# notification pop-up --> press not now
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[3]/div[1]/div/div[2]/div/div/div/div/div[2]/div/div/div[3]/button[2]').click()
-		time.sleep(2)
+		WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, 'button._a9--:nth-child(2)'))).click()
 
-		# click messages button in the right collumn
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div[2]/div[5]/div/div/span/div/a/div/div[2]/div/div/span/span').click()
-		time.sleep(5)
+		# messages page
+		self.bot.get(self.dm_url)
 
 		# send message button
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div[4]/div').click()
-		time.sleep(2)
+		WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, '.xjyslct'))).click()
 
 		# enter the username in input field
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[2]/div/div[2]/input').send_keys(self.receiver)
-		time.sleep(3)
+		WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.NAME, 'queryBox'))).send_keys(self.receiver)
 
 		# click the tick-box to select the account
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div/div[3]/div/label/div/input').click()
+		self.bot.find_element(By.XPATH, 'div.x1dm5mii:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > \
+			div:nth-child(3) > div:nth-child(1) > label:nth-child(1) > div:nth-child(1) > input:nth-child(2)').click()
 		time.sleep(1)
 
 		# click 'chat' button
-		self.bot.find_element(By.XPATH,
-							'/html/body/div[7]/div[1]/div/div[2]/div/div/div/div/div/div/div[1]/div/div[4]/div').click()
+		WebDriverWait(self.bot, 20).until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, '.xn3w4p2'))).click()
 		time.sleep(5)
 
 		# click on messages text box
-		send = self.bot.find_element(By.XPATH,
-									'/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')
+		send = self.bot.find_element(By.XPATH, '/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[1]/section/main/section/div/div/div\
+			/div[1]/div/div[2]/div/div/div/div/div/div/div[2]/div/div/div[2]/div/div/div[2]/div/div[1]')
 		send.click()
 		time.sleep(1)
 
@@ -102,20 +96,8 @@ class bot:
 		self.bot.close()
 
 
-# calling the main function through an initialising function
-def init(username, password, two_FA_Code, reciever, message):
-	bot(username, password, two_FA_Code, reciever, message)
+# print('Using account: ' + account_username)
+# receiver_username = input('Enter reciever username: ')
+# message_ = input('Message: ')
 
-	print("DONE")
-
-auth_code = authenticator.returnTwoFA('Instagram')
-account_username = 'zenderwastaken'
-account_password = '02jISG#SNuP5krJ1'
-receiver_username = ''
-message_ = ''
-
-print('Using account: ' + account_username)
-receiver_username = input('Enter reciever username: ')
-message_ = input('Message: ')
-
-init(account_username, account_password, auth_code, receiver_username, message_)
+# init(account_username, account_password, auth_code, receiver_username, message_)

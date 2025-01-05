@@ -6,6 +6,7 @@ import hmac
 import base64
 import struct
 import hashlib
+import encrypt_decrypt
 
 # main magical function
 def get_hotp_token(secret, intervals_no):
@@ -39,10 +40,5 @@ def prefix0(h):
 	return h
 
 
-def returnTwoFA(label):
-	rel = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-	with open(os.path.join(rel,'secrets.json'), 'r') as f:
-		secrets = json.load(f)
-	for x, key in sorted(list(secrets.items())):
-		if x == label:
-			return get_totp_token(key)
+def returnCode(key: str):
+	return get_totp_token(key)
